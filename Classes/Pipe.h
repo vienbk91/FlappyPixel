@@ -1,26 +1,27 @@
-/*
- * Pipe.h
- *
- *  Created on: 3 Jun 2015
- *      Author: chu
- */
-
-#ifndef PIPE_H_
-#define PIPE_H_
+#ifndef __PIPE_H__
+#define __PIPE_H__
 
 #include "cocos2d.h"
+#include "Definitions.h"
 
 USING_NS_CC;
 
-
-class Pipe : public Sprite {
+class Pipe
+{
 public:
-	static Pipe* createPipe();
-	bool init();
+	Pipe(Layer* layer);
+	void moveFinished();
+	bool isMoveFinished;
 
 private:
+	Sprite* topTexture, *bottomTexture;
+	
+	Size visibleSize;
+	Vec2 origin;
 
+	float velocity;
+	float endPositionX;
+	
 };
 
-
-#endif /* PIPE_H_ */
+#endif //__PIPE_H__

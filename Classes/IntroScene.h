@@ -1,30 +1,25 @@
-/*
- * IntroScene.h
- *
- *  Created on: 2 Jun 2015
- *      Author: chu
- */
-
-#ifndef INTROSCENE_H_
-#define INTROSCENE_H_
+#ifndef __INTRO_SCENE_H__
+#define __INTRO_SCENE_H__
 
 #include "cocos2d.h"
 #include "MenuScene.h"
 
 USING_NS_CC;
 
-class IntroScene : public Layer {
+class IntroScene : public cocos2d::Layer
+{
 public:
-	static Scene* createScene();
-	virtual bool init();
+    // there's no 'id' in cpp, so we recommend returning the class instance pointer
+    static cocos2d::Scene* createScene();
 
-
+    // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
+    virtual bool init();
+    
+    // implement the "static create()" method manually
 	CREATE_FUNC(IntroScene);
 
 private:
-	void changeToMenuScene(float dt);
-
+	void gotoMenuScene(float dt);
 };
 
-
-#endif /* INTROSCENE_H_ */
+#endif // __INTRO_SCENE_H__

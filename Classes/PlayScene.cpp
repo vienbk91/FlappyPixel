@@ -1,110 +1,172 @@
-/*
- * PlayScene.cpp
- *
- *  Created on: 2 Jun 2015
- *      Author: chu
- */
-
-
 #include "PlayScene.h"
 
-Scene* PlayScene::createScene(){
-	auto scene = Scene::createWithPhysics();
+Scene* PlayScene::createScene()
+{
+    // 'scene' is an autorelease object
+    auto scene = Scene::createWithPhysics();
 	//scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 	scene->getPhysicsWorld()->setGravity(Vec2(0, 0));
+    
+    // 'layer' is an autorelease object
+    auto layer = PlayScene::create();
+	
+    // add layer as a child to scene
+    scene->addChild(layer);
 
-
-	auto layer = PlayScene::create();
-
-	scene->addChild(layer);
-
-	return scene;
+    // return the scene
+    return scene;
 }
 
-bool PlayScene::init(){
-	if(!Layer::init()){
-		return false;
-	}
+// on "init" you need to initialize your instance
+bool PlayScene::init()
+{
+    //////////////////////////////
+    // 1. super init first
+    if ( !Layer::init() )
+    {
+        return false;
+    }
+    
+    visibleSize = Director::getInstance()->getVisibleSize();
+    origin = Director::getInstance()->getVisibleOrigin();
 
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    /////////////////////////////
 
-	///////////////////////////////////////////////////////////
-	// BACKGROUND
-	///////////////////////////////////////////////////////////
+	isDead = false;
 
-	Sprite* playBG = Sprite::create("PlayBackground.png");
-	float _scaleX = (float)(visibleSize.width / playBG->getContentSize().width);
-	float _scaleY = (float)(visibleSize.height / playBG->getContentSize().height);
-	playBG->setScale(_scaleX , _scaleY);
-	playBG->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
-	this->addChild(playBG);
+	Sprite *menuBackground = Sprite::create("PlayBackground.png");
+	menuBackground->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+	this->addChild(menuBackground);
 
-	///////////////////////////////////////////////////////////
-	// PIXEL
-	///////////////////////////////////////////////////////////
+	//EdgeBox
+	/*auto edgeBox = Node::create();
+	auto edgeBoxBody = PhysicsBody::createEdgeBox(visibleSize, PHYSICSBODY_MATERIAL_DEFAULT, 3);
 
-	_pixel = Pixel::createPixel();
-	this->addChild(_pixel , 5);
+	edgeBox->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+	edgeBox->setPhysicsBody(edgeBoxBody);
+	this->addChild(edgeBox);*/
 
-	///////////////////////////////////////////////////////////
-	// PIPE
-	///////////////////////////////////////////////////////////
 
-	this->schedule(schedule_selector(PlayScene::createPipe , this) , 0.1f);
-	_listPipes.push_back(new PipeManager(this));
+	//Player
+	pixel = new Pixel(this);
 
-	///////////////////////////////////////////////////////////
-	//Update
-	///////////////////////////////////////////////////////////
+    //Event Listener
+	auto mouseListener = EventListenerMouse::create();
+	mouseListener->onMouseDown = CC_CALLBACK_1(PlayScene::onMouseDown, this);
 
-	this->scheduleUpdate();
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(mouseListener, this);
 
-	///////////////////////////////////////////////////////////
-	// TOUCH MANAGER
-	///////////////////////////////////////////////////////////
-
-	auto listener = EventListenerTouchOneByOne::create();
-	listener->setSwallowTouches(true);
-
-	listener->onTouchBegan = CC_CALLBACK_2(PlayScene::onTouchBegan, this);
-	listener->onTouchMoved = CC_CALLBACK_2(PlayScene::onTouchMoved, this);
-	listener->onTouchEnded = CC_CALLBACK_2(PlayScene::onTouchEnded, this);
-
-	auto dispatcher = Director::getInstance()->getEventDispatcher();
-	dispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
-	///////////////////////////////////////////////////////////
-	// TOUCH MANAGER
-	///////////////////////////////////////////////////////////
-	
+	//Contact listener
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(PlayScene::onContactBegin, this);
 
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(contactListener, this);
 
+	//Update
+	this->scheduleUpdate();
 
-	return true;
+	this->schedule(schedule_selector(PlayScene::createPipe, this), 2.0f);
+
+	listPipes.push_back(new Pipe(this));
+
+	//Score
+	score = 0;
+	scoreLabel = LabelTTF::create("0", "fonts/Minecrafter.ttf", 100);
+	scoreLabel->setPosition(origin.x + visibleSize.width / 2, origin.y + (visibleSize.height / 6) * 5);
+
+	this->addChild(scoreLabel, 50);
+
+    return true;
 }
 
+void PlayScene::update(float dt)
+{
+	
+	for (std::list<Pipe*>::iterator pipe = listPipes.begin(); pipe != listPipes.end(); pipe++)
+	{
+		if ((*pipe)->isMoveFinished)
+		{
+			CC_SAFE_DELETE((*pipe));
+			listPipes.remove(*pipe);
+			break;
+		}
+	}
 
-void PlayScene::createPipe(float dt){
-	_listPipes.push_back(new PipeManager(this));
+	pixel->Update();
+
+	if (isDead || pixel->isDead)
+	{
+		this->removeChild(scoreLabel);
+		this->pause();
+
+		auto childs = this->getChildren();
+		for each (auto child in childs)
+		{
+			child->pause();
+		}
+
+		auto overlayer = OverLayer::create();
+		overlayer->setScore(score);
+
+		overlayer->setPosition(origin.x, origin.y);
+		this->addChild(overlayer, 110);
+	}
+	
 }
 
-
-bool PlayScene::onTouchBegan(Touch* touch, Event* event){
-	return true;
+void PlayScene::onMouseDown(Event* _event)
+{
+	EventMouse* mouse = (EventMouse*)_event;
+	if (mouse->getMouseButton() == MOUSE_BUTTON_LEFT)
+	{
+		pixel->Flap();
+		this->scheduleOnce(schedule_selector(PlayScene::pixelFall), 0.1);
+	}
 }
 
-void PlayScene::onTouchMoved(Touch* touch, Event* event){
-
+void PlayScene::pixelFall(float dt)
+{
+	pixel->Fall();
 }
 
-void PlayScene::onTouchEnded(Touch* touch, Event* event){
+void PlayScene::onExit()
+{
+	Layer::onExit();
 
+	CC_SAFE_DELETE(pixel);
+	
+	while (!listPipes.empty())
+	{
+		CC_SAFE_DELETE(listPipes.front());
+		listPipes.pop_front();
+	}
 }
 
-bool PlayScene::onContactBegin(PhysicsContact &contact){
+void PlayScene::createPipe(float dt)
+{
+	listPipes.push_back(new Pipe(this));
+}
+
+bool PlayScene::onContactBegin(PhysicsContact &contact)
+{
+	auto shapeA = contact.getShapeA();
+	auto shapeB = contact.getShapeB();
+
+	if ((shapeA->getCategoryBitmask() == eObjectBitmask::PIPE && shapeB->getCategoryBitmask() == eObjectBitmask::PIXEL) ||
+		(shapeB->getCategoryBitmask() == eObjectBitmask::PIPE && shapeA->getCategoryBitmask() == eObjectBitmask::PIXEL))
+	{
+		isDead = true;
+	}
+	else
+	{
+		if ((shapeA->getCategoryBitmask() == eObjectBitmask::LINE && shapeB->getCategoryBitmask() == eObjectBitmask::PIXEL) ||
+			(shapeB->getCategoryBitmask() == eObjectBitmask::LINE && shapeA->getCategoryBitmask() == eObjectBitmask::PIXEL))
+		{
+			score++;
+			scoreLabel->setString(String::createWithFormat("%d", score)->getCString());
+		}
+	}
+
+
 	return true;
 }

@@ -1,37 +1,27 @@
-/*
- * OverLayer.h
- *
- *  Created on: 2 Jun 2015
- *      Author: chu
- */
-
-#ifndef OVERLAYER_H_
-#define OVERLAYER_H_
+#ifndef __OVER_LAYER_H__
+#define __OVER_LAYER_H__
 
 #include "cocos2d.h"
 #include "MenuScene.h"
-#include "PlayScene.h"
 
 USING_NS_CC;
 
-class OverLayer : public Layer {
+class OverLayer : public cocos2d::Layer
+{
 public:
-	virtual bool init();
-
-	// Ham create layer duoc dinh nghia san
+    // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
+    virtual bool init();
+    
+    // implement the "static create()" method manually
 	CREATE_FUNC(OverLayer);
 
+	void setScore(int _score);
+
 private:
-	void changeToMenuScene(Ref* pSender);
-	void changeToPlayScene(Ref* pSender);
-	void setScore(int score);
-
-	int _score;
-	int _hightScore;
-	Label* _scoreLabel;
-	Label* _highScoreLabel;
-
+	void gotoMenuScene(); 
+	void gotoPlayScene();
+	int score;
+	LabelTTF* scoreLabel;
 };
 
-
-#endif /* OVERLAYER_H_ */
+#endif // __OVER_LAYER_H__

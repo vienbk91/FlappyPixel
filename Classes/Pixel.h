@@ -1,50 +1,30 @@
-/*
- * Pixel.h
- *
- *  Created on: 2 Jun 2015
- *      Author: chu
- */
-
-
-//////////////////////////////////////////////////////////////////////
-// Lop xay dung doi tuong pixel
-//////////////////////////////////////////////////////////////////////
-
-#ifndef PIXEL_H_
-#define PIXEL_H_
+#ifndef __PIXEL_H__
+#define __PIXEL_H__
 
 #include "cocos2d.h"
-#include "Define.h"
+#include "Definitions.h"
 
 USING_NS_CC;
 
-
-class Pixel : public Sprite {
+class Pixel
+{
 public:
-	static Pixel* createPixel();
-	virtual bool init();
-
-
+	Pixel(Layer* layer);
+	void Flap();
+	void Update();
+	void Fall();
+	bool isDead;
 
 private:
+	Sprite* pixelTexture;
+	PhysicsBody* pixelBody;
 
-	PhysicsBody* _pixelBody;
+	Size visibleSize;
+	Vec2 origin;
 
-	Size _visibleSize;
-	Vec2 _origin;
-
-	/*
 	bool isFalling;
-	bool isDead;
 	Vec2 velocity;
 	float rotation;
-
-
-	void update();
-	void flap();
-	void fall();
-	*/
 };
 
-
-#endif /* PIXEL_H_ */
+#endif //__PIXEL_H__

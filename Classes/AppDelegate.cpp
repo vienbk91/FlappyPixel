@@ -1,5 +1,4 @@
 #include "AppDelegate.h"
-#include "HelloWorldScene.h"
 #include "IntroScene.h"
 
 USING_NS_CC;
@@ -29,17 +28,16 @@ bool AppDelegate::applicationDidFinishLaunching() {
     auto glview = director->getOpenGLView();
     if(!glview) {
         glview = GLViewImpl::create("My Game");
+		
+		//Vi man hinh nho
+		glview->setFrameSize(360, 600);
+		//glview->setFrameSize(480, 800);
+
         director->setOpenGLView(glview);
     }
 
-
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-
-	glview->setFrameSize(480 , 800);
-	glview->setDesignResolutionSize(480 , 800 , ResolutionPolicy::FIXED_HEIGHT);
-
-#endif
-
+	//
+	glview->setDesignResolutionSize(480, 800, ResolutionPolicy::NO_BORDER);
 
     // turn on display FPS
     director->setDisplayStats(true);

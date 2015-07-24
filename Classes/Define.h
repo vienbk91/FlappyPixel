@@ -14,7 +14,7 @@
 enum eObjectBitmask {
 	PIPE = 0x01 , //0001
 	PIXEL = 0x02 , //0010
-	LINE = 0x04 //0100
+	LINE = 0x04, //0100
 };
 
 

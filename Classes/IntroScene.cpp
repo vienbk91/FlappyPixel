@@ -1,53 +1,47 @@
-/*
- * IntroScene.cpp
- *
- *  Created on: 2 Jun 2015
- *      Author: chu
- */
-
 #include "IntroScene.h"
 
-USING_NS_CC;
+Scene* IntroScene::createScene()
+{
+    // 'scene' is an autorelease object
+    auto scene = Scene::create();
+    
+    // 'layer' is an autorelease object
+    auto layer = IntroScene::create();
 
-Scene* IntroScene::createScene(){
-	auto scene = Scene::create();
-	auto layer = IntroScene::create();
+    // add layer as a child to scene
+    scene->addChild(layer);
 
-	scene->addChild(layer);
-
-	return scene;
+    // return the scene
+    return scene;
 }
 
-bool IntroScene::init(){
-	if(!Layer::init()){
-		return false;
-	}
+// on "init" you need to initialize your instance
+bool IntroScene::init()
+{
+    //////////////////////////////
+    // 1. super init first
+    if ( !Layer::init() )
+    {
+        return false;
+    }
+    
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	Size visibleSize = Director::getInstance()->getVisibleSize();
-	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    /////////////////////////////
+    
+	auto introBackground = Sprite::create("IntroBackground.png");
+	introBackground->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
 
-	///////////////////////////////////////////////////////////
-	// BACKGROUND
-	///////////////////////////////////////////////////////////
+	this->addChild(introBackground);
 
-	Sprite* introBG = Sprite::create("IntroBackground.png");
-	float _scaleX = (float) (visibleSize.width / introBG->getContentSize().width);
-	float _scaleY = (float) (visibleSize.height / introBG->getContentSize().height);
-
-	introBG->setPosition(Vec2(origin.x + visibleSize.width/2 , origin.y + visibleSize.height/2));
-	this->addChild(introBG);
-
-
-	// Scehdule chi thuc hien 1 lan sau thoi gian dt = 2s
-	this->scheduleOnce(schedule_selector(IntroScene::changeToMenuScene ) , 2.0f);
-
-
-	return true;
+	this->scheduleOnce(schedule_selector(IntroScene::gotoMenuScene), 2.0f);
+    
+    return true;
 }
 
-void IntroScene::changeToMenuScene(float dt){
-	log("=======Change to MenuScene==========");
-	auto menuScene = MenuScene::createScene();
-	Director::getInstance()->replaceScene(TransitionMoveInR::create(0.25f , menuScene));
-
+void IntroScene::gotoMenuScene(float dt)
+{
+	auto menuscene = MenuScene::createScene();
+	Director::getInstance()->replaceScene(TransitionMoveInR::create(0.25f, menuscene));
 }

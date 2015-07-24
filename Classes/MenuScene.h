@@ -1,28 +1,25 @@
-/*
- * MenuScene.h
- *
- *  Created on: 2 Jun 2015
- *      Author: chu
- */
-
-#ifndef MENUSCENE_H_
-#define MENUSCENE_H_
+#ifndef __MENU_SCENE_H__
+#define __MENU_SCENE_H__
 
 #include "cocos2d.h"
 #include "PlayScene.h"
 
 USING_NS_CC;
 
-class MenuScene : public Layer {
+class MenuScene : public cocos2d::Layer
+{
 public:
-	static Scene* createScene();
-	virtual bool init();
+    // there's no 'id' in cpp, so we recommend returning the class instance pointer
+    static cocos2d::Scene* createScene();
 
+    // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
+    virtual bool init();
+    
+    // implement the "static create()" method manually
 	CREATE_FUNC(MenuScene);
 
 private:
-	
-	void changeToPlayScene(Ref* pSender);
+	void gotoPlayScene();
 };
 
-#endif /* MENUSCENE_H_ */
+#endif // __MENU_SCENE_H__

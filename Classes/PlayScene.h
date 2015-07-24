@@ -1,48 +1,47 @@
-/*
- * PlayScene.h
- *
- *  Created on: 2 Jun 2015
- *      Author: chu
- */
-
-#ifndef PLAYSCENE_H_
-#define PLAYSCENE_H_
+#ifndef __PLAY_SCENE_H__
+#define __PLAY_SCENE_H__
 
 #include "cocos2d.h"
-#include "PipeManager.h"
+#include "Definitions.h"
 #include "Pixel.h"
 #include "Pipe.h"
-
+#include "MenuScene.h"
+#include "OverLayer.h"
 
 USING_NS_CC;
 
-class PlayScene : public Layer {
+class PlayScene : public cocos2d::Layer
+{
 public:
-	static Scene* createScene();
-	virtual bool init();
+    // there's no 'id' in cpp, so we recommend returning the class instance pointer
+    static cocos2d::Scene* createScene();
 
+    // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
+    virtual bool init();
+    
+    // implement the "static create()" method manually
 	CREATE_FUNC(PlayScene);
 
-	void createPipe(float dt);
+	void onMouseDown(Event* _event);
 	void update(float dt);
+	void onExit();
+	bool onContactBegin(PhysicsContact &contact);
 
 private:
+	Size visibleSize;
+	Vec2 origin;
 
-	Pixel *_pixel;
-	int _score;
-	Label *_scoreLabel;
+	Pixel* pixel;
+	void pixelFall(float dt);
 
-	Pipe* _topPipe;
-	Pipe* _bottomPipe;
+	void createPipe(float dt);
+	void pipeMoveFinished();
+	std::list<Pipe*> listPipes;
 
-	std::vector<PipeManager*> _listPipes;
+	bool isDead;
 
-	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
-	void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
-	void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
-
-	bool onContactBegin(PhysicsContact &contact);
+	LabelTTF* scoreLabel;
+	int score;
 };
 
-
-#endif /* PLAYSCENE_H_ */
+#endif // __PLAY_SCENE_H__
